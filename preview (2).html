@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>Mini Browser</title>
+<style>
+  body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* 上部バー */
+  header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px;
+    background: #f1f1f1;
+  }
+
+  input {
+    flex: 1;
+    padding: 8px;
+  }
+
+  button {
+    padding: 8px 12px;
+    cursor: pointer;
+  }
+
+  /* タブバー */
+  #tabs {
+    display: flex;
+    background: #ddd;
+    overflow-x: auto;
+  }
+
+  .tab {
+    padding: 8px 12px;
+    background: #ccc;
+    margin-right: 2px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+  }
+
+  .tab.active {
+    background: white;
+    font-weight: bold;
+  }
+
+  .close {
+    cursor: pointer;
+    color: red;
+  }
+
+  /* 表示エリア */
+  #view {
+    flex: 1;
+  }
+
+  iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+  }
+
+  /* 新規タブボタン */
+  #newTab {
+    padding: 8px;
+    background: #bbb;
+    cursor: pointer;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <button onclick="newTab()">＋</button>
+  <input id="url" placeholder="URL or 検索ワード" />
+  <button onclick="go()">移動</button>
+</header>
+
+<div id="tabs"></div>
+<div id="view"></div>
+
+<script>
+let tabs = [];
+let activeTab = 0;
+
+function newTab(url = "https://duckduckgo.com") {
+  const id = Date.now();
+
+  const tab = {
+    id,
+    url,
+    title: "新しいタブ"
+  };
+
+  tabs.push(tab);
+  activeTab = tabs.length - 1;
+
+  renderTabs();
+  renderView();
+}
+
+function closeTab(index, e) {
+  e.stopPropagation();
+
+  tabs.splice(index, 1);
+
+  if (tabs.length === 0) {
+    newTab();
+    return;
+  }
+
+  activeTab = Math.max(0, activeTab - 1);
+
+  renderTabs();
+  renderView();
+}
+
+function switchTab(index) {
+  activeTab = index;
+  renderTabs();
+  renderView();
+}
+
+function renderTabs() {
+  const box = document.getElementById("tabs");
+  box.innerHTML = "";
+
+  tabs.forEach((t, i) => {
+    const div = document.createElement("div");
+    div.className = "tab" + (i === activeTab ? " active" : "");
+    div.onclick = () => switchTab(i);
+
+    div.innerHTML = `
+      ${t.title}
+      <span class="close" onclick="closeTab(${i}, event)">×</span>
+    `;
+
+    box.appendChild(div);
+  });
+}
+
+function renderView() {
+  const view = document.getElementById("view");
+  view.innerHTML = "";
+
+  const iframe = document.createElement("iframe");
+  iframe.src = tabs[activeTab].url;
+
+  view.appendChild(iframe);
+}
+
+function go() {
+  let input = document.getElementById("url").value;
+
+  if (!input) return;
+
+  // URLっぽいか判定
+  if (!input.includes("http")) {
+    input = "https://duckduckgo.com/?q=" + encodeURIComponent(input);
+  }
+
+  tabs[activeTab].url = input;
+  tabs[activeTab].title = input.length > 20 ? input.slice(0, 20) + "..." : input;
+
+  renderTabs();
+  renderView();
+}
+
+/* 初期タブ */
+newTab();
+</script>
+
+</body>
+</html>

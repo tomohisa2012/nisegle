@@ -2,182 +2,67 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>Mini Browser Pro</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Web Viewer</title>
+
 <style>
-body {
-  margin:0;
-  font-family:Arial;
-  display:flex;
-  flex-direction:column;
-  height:100vh;
+* {
+  box-sizing:border-box;
 }
 
-/* 上バー */
+body {
+  margin:0;
+  font-family:Arial, sans-serif;
+  background:#1e1e1e;
+  color:white;
+  height:100vh;
+  display:flex;
+  flex-direction:column;
+}
+
 header {
   display:flex;
-  gap:6px;
-  padding:8px;
-  background:#eee;
+  gap:8px;
+  padding:10px;
+  background:#2a2a2a;
+  border-bottom:1px solid #444;
+}
+
+button {
+  padding:8px 12px;
+  border:none;
+  background:#444;
+  color:white;
+  cursor:pointer;
+  border-radius:8px;
+}
+
+button:hover {
+  background:#666;
 }
 
 input {
   flex:1;
-  padding:8px;
-}
-
-button {
-  padding:8px 10px;
-  cursor:pointer;
-}
-
-/* タブ */
-#tabs {
-  display:flex;
-  background:#ddd;
-  overflow-x:auto;
-}
-
-.tab {
-  padding:8px 10px;
-  background:#ccc;
-  margin-right:2px;
-  cursor:pointer;
-  white-space:nowrap;
-}
-
-.tab.active {
-  background:white;
-  font-weight:bold;
-}
-
-/* 表示 */
-#view {
-  flex:1;
-}
-
-iframe {
-  width:100%;
-  height:100%;
+  padding:10px;
   border:none;
-}
-</style>
-</head>
-
-<body>
-
-<header>
-  <button onclick="back()">←</button>
-  <button onclick="forward()">→</button>
-  <button onclick="newTab()">＋</button>
-
-  <input id="q" placeholder="URL or 検索ワード">
-  <button onclick="go()">検索/移動</button>
-</header>
-
-<div id="tabs"></div>
-<div id="view"></div>
-
-<script>
-let tabs = [];
-let active = 0;
-
-/* 履歴管理 */
-function createTab(url="https://duckduckgo.com") {
-  tabs.push({
-    history:[url],
-    index:0,
-    title:"新規タブ"
-  });
-  active = tabs.length - 1;
-  render();
+  border-radius:8px;
+  background:#111;
+  color:white;
 }
 
-function current() {
-  return tabs[active];
+#viewer {
+  flex:1;
+  overflow:auto;
+  background:white;
+  color:black;
+  padding:30px;
 }
 
-/* 移動 */
-function navigate(url) {
-  const t = current();
-
-  // 履歴の途中を切る
-  t.history = t.history.slice(0, t.index + 1);
-
-  t.history.push(url);
-  t.index++;
-
-  render();
+.loading {
+  color:#aaa;
 }
 
-/* 戻る */
-function back() {
-  const t = current();
-  if (t.index > 0) {
-    t.index--;
-    render();
-  }
+img {
+  max-width:100%;
 }
-
-/* 進む */
-function forward() {
-  const t = current();
-  if (t.index < t.history.length - 1) {
-    t.index++;
-    render();
-  }
-}
-
-/* 検索 or URL */
-function go() {
-  let v = document.getElementById("q").value;
-
-  if (!v) return;
-
-  if (!v.startsWith("http")) {
-    v = "https://duckduckgo.com/?q=" + encodeURIComponent(v);
-  }
-
-  navigate(v);
-}
-
-/* タブ追加 */
-function newTab() {
-  createTab();
-}
-
-/* タブ切替 */
-function switchTab(i) {
-  active = i;
-  render();
-}
-
-/* UI描画 */
-function render() {
-  const tabsBox = document.getElementById("tabs");
-  const view = document.getElementById("view");
-
-  tabsBox.innerHTML = "";
-  view.innerHTML = "";
-
-  tabs.forEach((t, i) => {
-    const d = document.createElement("div");
-    d.className = "tab" + (i === active ? " active" : "");
-    d.textContent = t.history[t.index].slice(0, 25);
-    d.onclick = () => switchTab(i);
-    tabsBox.appendChild(d);
-  });
-
-  const t = current();
-
-  const iframe = document.createElement("iframe");
-  iframe.src = t.history[t.index];
-
-  view.appendChild(iframe);
-}
-
-/* 初期タブ */
-createTab();
-</script>
-
-</body>
 </html>
